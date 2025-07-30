@@ -1,0 +1,152 @@
+import { StyleSheet } from 'react-native';
+
+export const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    width: 280,
+    backgroundColor: 'rgba(26, 26, 26, 0.6)', // translucidez para blur
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 2,
+      height: 0,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    overflow: 'hidden',
+  },
+  profileSection: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333333',
+  },
+  profileImageContainer: {
+    marginBottom: 15,
+    position: 'relative',
+  },
+  profileGlow: {
+    position: 'absolute',
+    top: -10,
+    left: -10,
+    right: -10,
+    bottom: -10,
+    borderRadius: 50,
+    backgroundColor: 'rgba(255, 215, 0, 0.3)',
+    zIndex: 0,
+  },
+  profileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 3,
+    borderColor: '#FFD700',
+    zIndex: 1,
+  },
+  profileImagePlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#FFD700',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#FFD700',
+    zIndex: 1,
+  },
+  profileImageText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  userName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 5,
+    textAlign: 'center',
+  },
+  userEmail: {
+    fontSize: 14,
+    color: '#CCCCCC',
+    textAlign: 'center',
+  },
+  menuItems: {
+    flex: 1,
+    paddingTop: 20,
+  },
+  menuItemContainer: {
+    marginHorizontal: 10,
+    marginVertical: 3,
+    borderRadius: 12,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  menuItemBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 12,
+  },
+  menuItemBorder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  menuItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    zIndex: 1,
+  },
+  menuIcon: {
+    fontSize: 20,
+    marginRight: 15,
+    width: 30,
+  },
+  menuText: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    fontWeight: '500',
+    flex: 1,
+  },
+  logoutIcon: {
+    opacity: 0.9,
+  },
+  logoutText: {
+    color: '#FF6B6B',
+  },
+  separator: {
+    height: 1,
+    backgroundColor: 'rgba(51, 51, 51, 0.8)',
+    marginVertical: 15,
+    marginHorizontal: 20,
+  },
+  footer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#333333',
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 12,
+    color: '#888888',
+  },
+  menuIcon: {
+  width: 30,
+  alignItems: 'center',
+},
+
+});
