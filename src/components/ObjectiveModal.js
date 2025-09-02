@@ -9,21 +9,15 @@ import {
   Alert,
   ScrollView,
   Animated,
+  SafeAreaView,
 } from 'react-native';
+import { useFinancial } from '../context/FinancialContext';
 
-// Enhanced Date Picker Component with 3D Glass Effects
-const DatePicker3D = ({ visible, onClose, onDateSelect, selectedDate }) => {
-  const scaleAnim = useRef(new Animated.Value(0)).current;
-  const glowAnim = useRef(new Animated.Value(0)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-  
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth();
-  
-  const [year, setYear] = useState(selectedDate ? new Date(selectedDate).getFullYear() : currentYear);
-  const [month, setMonth] = useState(selectedDate ? new Date(selectedDate).getMonth() : currentMonth);
-  const [day, setDay] = useState(selectedDate ? new Date(selectedDate).getDate() : currentDate.getDate());
+// Simplified Date Picker Component
+const SimpleDatePicker = ({ visible, onClose, onDateSelect, selectedDate }) => {
+  const [year, setYear] = useState(selectedDate ? new Date(selectedDate).getFullYear() : new Date().getFullYear());
+  const [month, setMonth] = useState(selectedDate ? new Date(selectedDate).getMonth() : new Date().getMonth());
+  const [day, setDay] = useState(selectedDate ? new Date(selectedDate).getDate() : new Date().getDate());
 
   const months = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -37,52 +31,6 @@ const DatePicker3D = ({ visible, onClose, onDateSelect, selectedDate }) => {
   const getFirstDayOfMonth = (year, month) => {
     return new Date(year, month, 1).getDay();
   };
-
-  useEffect(() => {
-    if (visible) {
-      Animated.parallel([
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          useNativeDriver: true,
-          tension: 300,
-          friction: 10,
-        }),
-        Animated.timing(glowAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: false,
-        }),
-      ]).start();
-
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1.02,
-            duration: 2000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 2000,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-    } else {
-      Animated.parallel([
-        Animated.timing(scaleAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(glowAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: false,
-        }),
-      ]).start();
-    }
-  }, [visible]);
 
   const handleDateConfirm = () => {
     const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -112,8 +60,7 @@ const DatePicker3D = ({ visible, onClose, onDateSelect, selectedDate }) => {
 
     for (let i = 1; i <= daysInMonth; i++) {
       const isSelected = i === day;
-      const isToday = i === currentDate.getDate() && month === currentMonth && year === currentYear;
-      const isFuture = new Date(year, month, i) >= currentDate;
+      const isToday = i === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
       
       days.push(
         <TouchableOpacity
@@ -131,7 +78,6 @@ const DatePicker3D = ({ visible, onClose, onDateSelect, selectedDate }) => {
             styles.calendarDayText,
             isSelected && styles.calendarDayTextSelected,
             isToday && styles.calendarDayTextToday,
-            isFuture && !isToday && { color: '#4CAF50' },
           ]}>
             {i}
           </Text>
@@ -145,40 +91,9 @@ const DatePicker3D = ({ visible, onClose, onDateSelect, selectedDate }) => {
   if (!visible) return null;
 
   return (
-    <Modal transparent visible={visible} animationType="none">
+    <Modal transparent visible={visible} animationType="slide">
       <View style={styles.datePickerOverlay}>
-        <Animated.View
-          style={[
-            styles.datePickerContainer,
-            {
-              transform: [
-                { scale: scaleAnim },
-                { scale: pulseAnim }
-              ],
-              shadowOpacity: glowAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 0.8],
-              }),
-            },
-          ]}
-        >
-          {/* Glass overlay */}
-          <View style={[styles.glassOverlay, { borderRadius: 20, height: '40%' }]} />
-          
-          {/* Premium glow */}
-          <Animated.View
-            style={[
-              styles.premiumGlow,
-              {
-                borderRadius: 23,
-                opacity: glowAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.1, 0.3],
-                }),
-              },
-            ]}
-          />
-
+        <View style={styles.datePickerContainer}>
           {/* Header */}
           <View style={styles.datePickerHeader}>
             <Text style={styles.datePickerTitle}>Selecionar Data Meta</Text>
@@ -250,11 +165,9 @@ const DatePicker3D = ({ visible, onClose, onDateSelect, selectedDate }) => {
                 <Text key={day} style={styles.calendarHeaderText}>{day}</Text>
               ))}
             </View>
-            <ScrollView style={{ maxHeight: 240 }}>
-              <View style={styles.calendarGrid}>
-                {renderCalendarDays()}
-              </View>
-            </ScrollView>
+            <View style={styles.calendarGrid}>
+              {renderCalendarDays()}
+            </View>
           </View>
 
           {/* Action Buttons */}
@@ -274,54 +187,15 @@ const DatePicker3D = ({ visible, onClose, onDateSelect, selectedDate }) => {
               <Text style={styles.datePickerConfirmText}>Confirmar</Text>
             </TouchableOpacity>
           </View>
-
-          {/* 3D depth indicator */}
-          <View style={[styles.depthIndicator, { borderRadius: 20, height: 3 }]} />
-        </Animated.View>
+        </View>
       </View>
     </Modal>
   );
 };
 
-// Enhanced Date Input Component with Interactive Icon
+// Enhanced Date Input Component
 const DateInputWithPicker = ({ value, onDateChange, style, ...props }) => {
   const [pickerVisible, setPickerVisible] = useState(false);
-  const iconPulseAnim = useRef(new Animated.Value(1)).current;
-  const iconGlowAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(iconPulseAnim, {
-          toValue: 1.1,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(iconPulseAnim, {
-          toValue: 1,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
-
-  const handleIconPress = () => {
-    Animated.sequence([
-      Animated.timing(iconGlowAnim, {
-        toValue: 1,
-        duration: 150,
-        useNativeDriver: false,
-      }),
-      Animated.timing(iconGlowAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: false,
-      }),
-    ]).start();
-    
-    setPickerVisible(true);
-  };
 
   const formatDisplayDate = (dateString) => {
     if (!dateString) return '';
@@ -336,54 +210,25 @@ const DateInputWithPicker = ({ value, onDateChange, style, ...props }) => {
   return (
     <View style={styles.dateInputContainer}>
       <View style={styles.dateInputWrapper}>
-        <GlassInput
+        <TextInput
           value={formatDisplayDate(value)}
           placeholder="Selecione a data meta"
           placeholderTextColor="#666"
           editable={false}
-          style={[styles.dateInput, style]}
+          style={[styles.input, styles.dateInput, style]}
           {...props}
         />
         
-        <Animated.View
-          style={[
-            styles.calendarIconContainer,
-            {
-              transform: [{ scale: iconPulseAnim }],
-              shadowOpacity: iconGlowAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.3, 0.8],
-              }),
-            },
-          ]}
+        <TouchableOpacity
+          style={styles.calendarIcon}
+          onPress={() => setPickerVisible(true)}
+          activeOpacity={0.7}
         >
-          <TouchableOpacity
-            style={styles.calendarIcon}
-            onPress={handleIconPress}
-            activeOpacity={0.7}
-          >
-            <Animated.View
-              style={[
-                styles.premiumGlow,
-                {
-                  width: 44,
-                  height: 44,
-                  borderRadius: 22,
-                  top: -3,
-                  left: -3,
-                  opacity: iconGlowAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.1, 0.4],
-                  }),
-                },
-              ]}
-            />
-            <Text style={styles.calendarIconText}>📅</Text>
-          </TouchableOpacity>
-        </Animated.View>
+          <Text style={styles.calendarIconText}>📅</Text>
+        </TouchableOpacity>
       </View>
 
-      <DatePicker3D
+      <SimpleDatePicker
         visible={pickerVisible}
         onClose={() => setPickerVisible(false)}
         onDateSelect={onDateChange}
@@ -393,152 +238,81 @@ const DateInputWithPicker = ({ value, onDateChange, style, ...props }) => {
   );
 };
 
-// Enhanced Glass Input Component
-const GlassInput = ({ style, ...props }) => {
-  const focusAnim = useRef(new Animated.Value(0)).current;
-
-  const handleFocus = () => {
-    Animated.timing(focusAnim, {
-      toValue: 1,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  const handleBlur = () => {
-    Animated.timing(focusAnim, {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  return (
-    <Animated.View
-      style={{
-        shadowColor: focusAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: ['#000', '#FFD700'],
-        }),
-        shadowOpacity: focusAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0.3, 0.6],
-        }),
-        shadowRadius: focusAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [8, 15],
-        }),
-        elevation: focusAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [6, 12],
-        }),
-      }}
-    >
-      <View style={[styles.glassOverlay, { borderRadius: 12 }]} />
-      <TextInput
-        style={[styles.input, style]}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        {...props}
-      />
-      <View style={[styles.depthIndicator, { borderRadius: 12, height: 2 }]} />
-    </Animated.View>
-  );
-};
-
-// Enhanced Glass Button Component
-const GlassButton = ({ children, style, onPress, active = false, ...props }) => {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  const glowAnim = useRef(new Animated.Value(0)).current;
-
-  const handlePressIn = () => {
-    Animated.parallel([
-      Animated.spring(scaleAnim, {
-        toValue: 0.95,
-        useNativeDriver: true,
-      }),
-      Animated.timing(glowAnim, {
-        toValue: 1,
-        duration: 150,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.parallel([
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        useNativeDriver: true,
-      }),
-      Animated.timing(glowAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  };
-
-  return (
-    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-      <TouchableOpacity
-        style={style}
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        activeOpacity={1}
-        {...props}
-      >
-        <View style={[styles.glassOverlay, { borderRadius: style?.borderRadius || 10 }]} />
-        <View style={[styles.depthIndicator, { borderRadius: style?.borderRadius || 10 }]} />
-        {(active || glowAnim) && (
-          <Animated.View
-            style={[
-              styles.premiumGlow,
-              {
-                borderRadius: (style?.borderRadius || 10) + 3,
-                opacity: active ? 0.3 : glowAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, 0.3],
-                }),
-              },
-            ]}
-          />
-        )}
-        {children}
-      </TouchableOpacity>
-    </Animated.View>
-  );
-};
-
-const ObjectiveModal = ({ visible, onClose, objective, onSave }) => {
+const ObjectiveModal = ({ visible, onClose, objective = null }) => {
+  const { addObjective, updateObjective, loading: contextLoading } = useFinancial();
+  
+  // Estados do formulário
   const [title, setTitle] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
   const [currentAmount, setCurrentAmount] = useState('');
   const [deadline, setDeadline] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const modalScaleAnim = useRef(new Animated.Value(0)).current;
 
+  console.log('ObjectiveModal rendered with:', { visible, objective });
+
+  // Reset form data
+  const resetForm = () => {
+    setTitle('');
+    setTargetAmount('');
+    setCurrentAmount('0');
+    setDeadline('');
+    setErrors({});
+    setHasUnsavedChanges(false);
+  };
+
+  // Populate form when editing an objective
   useEffect(() => {
-    if (objective) {
-      setTitle(objective.title || '');
-      setTargetAmount(objective.target_amount?.toString() || '');
-      setCurrentAmount(objective.current_amount?.toString() || '');
-      
-      if (objective.deadline) {
-        const date = new Date(objective.deadline);
-        const formattedDate = date.toISOString().split('T')[0];
-        setDeadline(formattedDate);
+    console.log('useEffect triggered with visible:', visible, 'objective:', objective);
+    
+    if (visible) {
+      if (objective) {
+        console.log('Editing objective:', objective);
+        
+        setTitle(objective.title || '');
+        setTargetAmount(objective.target_amount?.toString() || '');
+        setCurrentAmount(objective.current_amount?.toString() || '0');
+        
+        // Handle different date field names from backend
+        let dateToSet = '';
+        if (objective.target_date) {
+          dateToSet = objective.target_date;
+        } else if (objective.deadline) {
+          dateToSet = objective.deadline;
+        }
+        
+        if (dateToSet) {
+          const date = new Date(dateToSet);
+          if (!isNaN(date.getTime())) {
+            const formattedDate = date.toISOString().split('T')[0];
+            setDeadline(formattedDate);
+            console.log('Set deadline to:', formattedDate);
+          }
+        }
+      } else {
+        console.log('Creating new objective, resetting form');
+        resetForm();
       }
-    } else {
-      setTitle('');
-      setTargetAmount('');
-      setCurrentAmount('0');
-      setDeadline('');
+      setErrors({});
+      setHasUnsavedChanges(false);
     }
   }, [objective, visible]);
 
+  // Track changes for unsaved warning (apenas para edição)
+  useEffect(() => {
+    if (visible && !loading && objective) { // Só monitora mudanças quando está editando
+      const hasChanges = title.trim() !== (objective.title || '') || 
+                        targetAmount !== (objective.target_amount?.toString() || '') || 
+                        currentAmount !== (objective.current_amount?.toString() || '0') || 
+                        deadline !== '';
+      setHasUnsavedChanges(hasChanges);
+    }
+  }, [title, targetAmount, currentAmount, deadline, visible, loading, objective]);
+
+  // Modal animation (safe animations only)
   useEffect(() => {
     if (visible) {
       Animated.spring(modalScaleAnim, {
@@ -556,59 +330,128 @@ const ObjectiveModal = ({ visible, onClose, objective, onSave }) => {
     }
   }, [visible]);
 
+  // Validação simplificada (apenas na hora de salvar)
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!title.trim()) {
+      newErrors.title = 'Título é obrigatório';
+    }
+
+    const cleanTargetAmount = targetAmount.replace(/[^\d.,]/g, '').replace(',', '.');
+    const numericTargetAmount = parseFloat(cleanTargetAmount);
+    
+    if (!targetAmount || isNaN(numericTargetAmount) || numericTargetAmount <= 0) {
+      newErrors.targetAmount = 'Valor meta deve ser maior que zero';
+    }
+
+    if (!deadline) {
+      newErrors.deadline = 'Data meta é obrigatória';
+    } else {
+      const selectedDate = new Date(deadline);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (isNaN(selectedDate.getTime())) {
+        newErrors.deadline = 'Data inválida';
+      } else if (selectedDate < today) {
+        newErrors.deadline = 'Data meta não pode ser no passado';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSave = async () => {
-    if (!title.trim() || !targetAmount || !deadline) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios');
-      return;
-    }
-
-    const numericTargetAmount = parseFloat(targetAmount);
-    const numericCurrentAmount = parseFloat(currentAmount) || 0;
-
-    if (isNaN(numericTargetAmount) || numericTargetAmount <= 0) {
-      Alert.alert('Erro', 'Por favor, insira um valor meta válido');
-      return;
-    }
-
-    if (numericCurrentAmount < 0) {
-      Alert.alert('Erro', 'O valor atual não pode ser negativo');
-      return;
-    }
-
-    const selectedDate = new Date(deadline);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (selectedDate < today) {
-      Alert.alert('Erro', 'A data meta não pode ser no passado');
+    console.log('Save attempt started');
+    
+    if (!validateForm()) {
+      console.log('Form validation failed:', errors);
       return;
     }
 
     setLoading(true);
 
     try {
+      const cleanTargetAmount = targetAmount.replace(/[^\d.,]/g, '').replace(',', '.');
+      const cleanCurrentAmount = currentAmount.replace(/[^\d.,]/g, '').replace(',', '.');
+      
+      const numericTargetAmount = parseFloat(cleanTargetAmount);
+      const numericCurrentAmount = parseFloat(cleanCurrentAmount) || 0;
+
       const objectiveData = {
         title: title.trim(),
         target_amount: numericTargetAmount,
         current_amount: numericCurrentAmount,
-        deadline: deadline,
+        target_date: deadline,
+        priority: 'medium',
+        category: 'general',
       };
 
-      await onSave(objectiveData);
+      console.log('Sending objective data:', objectiveData);
+
+      let result;
+      if (objective?.id) {
+        console.log('Updating objective with ID:', objective.id);
+        result = await updateObjective(objective.id, objectiveData);
+      } else {
+        console.log('Creating new objective');
+        result = await addObjective(objectiveData);
+      }
+
+      console.log('API result:', result);
+
+      if (result && result.success) {
+        Alert.alert(
+          'Sucesso!', 
+          objective?.id ? 'Objetivo atualizado com sucesso!' : 'Objetivo criado com sucesso!',
+          [
+            {
+              text: 'OK',
+              onPress: () => handleClose()
+            }
+          ]
+        );
+      } else {
+        throw new Error(result?.error || 'Falha ao salvar objetivo');
+      }
     } catch (error) {
       console.error('Error saving objective:', error);
-      Alert.alert('Erro', 'Falha ao salvar objetivo. Tente novamente.');
+      Alert.alert(
+        'Erro', 
+        error.message || 'Falha ao salvar objetivo. Verifique sua conexão e tente novamente.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleClose = () => {
-    setTitle('');
-    setTargetAmount('');
-    setCurrentAmount('');
-    setDeadline('');
-    onClose();
+    // Apenas avisa sobre mudanças não salvas se estiver editando um objetivo existente
+    if (hasUnsavedChanges && !loading && !objective) {
+      Alert.alert(
+        'Descartar alterações?',
+        'Você tem alterações não salvas. Deseja realmente sair?',
+        [
+          {
+            text: 'Cancelar',
+            style: 'cancel',
+          },
+          {
+            text: 'Descartar',
+            style: 'destructive',
+            onPress: () => {
+              resetForm();
+              onClose();
+            },
+          },
+        ]
+      );
+    } else {
+      resetForm();
+      onClose();
+    }
   };
 
   const generateSuggestedDate = (months) => {
@@ -617,204 +460,277 @@ const ObjectiveModal = ({ visible, onClose, objective, onSave }) => {
     return date.toISOString().split('T')[0];
   };
 
-  const progressPercentage = targetAmount && currentAmount 
-    ? Math.min((parseFloat(currentAmount) / parseFloat(targetAmount)) * 100, 100)
-    : 0;
+  const formatCurrencyInput = (value) => {
+    return value.replace(/[^\d.,]/g, '');
+  };
+
+  // Enhanced progress calculation
+  const calculateProgress = () => {
+    if (!targetAmount || !currentAmount) return { percentage: 0, isValid: false };
+    
+    const cleanTarget = targetAmount.replace(/[^\d.,]/g, '').replace(',', '.');
+    const cleanCurrent = currentAmount.replace(/[^\d.,]/g, '').replace(',', '.');
+    
+    const target = parseFloat(cleanTarget);
+    const current = parseFloat(cleanCurrent);
+    
+    if (isNaN(target) || isNaN(current) || target <= 0) {
+      return { percentage: 0, isValid: false };
+    }
+    
+    const percentage = Math.min((current / target) * 100, 100);
+    return { 
+      percentage: Math.max(0, percentage), 
+      isValid: true,
+      target,
+      current
+    };
+  };
+
+  const progressData = calculateProgress();
+  const isFormValid = title.trim() && targetAmount && deadline && !loading && !contextLoading;
+
+  if (!visible) return null;
 
   return (
     <Modal
       visible={visible}
-      animationType="none"
-      presentationStyle="pageSheet"
+      transparent={true}
+      animationType="slide"
       onRequestClose={handleClose}
-      transparent
     >
-      <View style={styles.modalOverlay}>
-        <Animated.View
-          style={[
-            styles.container,
-            {
-              transform: [{ scale: modalScaleAnim }],
-            },
-          ]}
-        >
-          {/* Glass overlay for modal */}
-          <View style={[styles.glassOverlay, { borderRadius: 20, height: '30%' }]} />
-          
-          {/* Premium glow for modal */}
-          <View style={[styles.premiumGlow, { borderRadius: 23 }]} />
-
-          <View style={styles.header}>
-            <GlassButton
-              style={styles.cancelButton}
-              onPress={handleClose}
-            >
-              <Text style={styles.cancelButtonText}>Cancelar</Text>
-            </GlassButton>
-            
-            <Text style={styles.title}>
-              {objective ? 'Editar Objetivo' : 'Novo Objetivo'}
-            </Text>
-            
-            <GlassButton
-              style={[styles.saveButton, loading && styles.saveButtonDisabled]}
-              onPress={handleSave}
-              disabled={loading}
-              active
-            >
-              <Text style={styles.saveButtonText}>
-                {loading ? 'Salvando...' : 'Salvar'}
-              </Text>
-            </GlassButton>
-          </View>
-
-          <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-            {/* Title Input */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Título do Objetivo *</Text>
-              <GlassInput
-                value={title}
-                onChangeText={setTitle}
-                placeholder="ex: Reserva de Emergência, Viagem, Carro Novo"
-                placeholderTextColor="#666"
-                maxLength={100}
-              />
-            </View>
-
-            {/* Target Amount Input */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Valor Meta *</Text>
-              <GlassInput
-                value={targetAmount}
-                onChangeText={setTargetAmount}
-                placeholder="0,00"
-                placeholderTextColor="#666"
-                keyboardType="numeric"
-              />
-            </View>
-
-            {/* Current Amount Input */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Valor Atual</Text>
-              <GlassInput
-                value={currentAmount}
-                onChangeText={setCurrentAmount}
-                placeholder="0,00"
-                placeholderTextColor="#666"
-                keyboardType="numeric"
-              />
-              <Text style={styles.helperText}>
-                Quanto você já tem economizado para este objetivo
-              </Text>
-            </View>
-
-            {/* Enhanced Deadline Input with Calendar */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Data Meta *</Text>
-              <DateInputWithPicker
-                value={deadline}
-                onDateChange={setDeadline}
-              />
+      <SafeAreaView style={styles.container}>
+        <View style={styles.modalOverlay}>
+          <Animated.View
+            style={[
+              styles.modalContent,
+              {
+                transform: [{ scale: modalScaleAnim }],
+              },
+            ]}
+          >
+            {/* Header */}
+            <View style={styles.header}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={handleClose}
+              >
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
               
-              {/* Quick Date Suggestions */}
-              <View style={styles.dateSuggestions}>
-                <Text style={styles.suggestionLabel}>Seleção rápida:</Text>
-                <View style={styles.suggestionButtons}>
-                  <GlassButton
-                    style={styles.suggestionButton}
-                    onPress={() => setDeadline(generateSuggestedDate(3))}
-                  >
-                    <Text style={styles.suggestionButtonText}>3 meses</Text>
-                  </GlassButton>
-                  
-                  <GlassButton
-                    style={styles.suggestionButton}
-                    onPress={() => setDeadline(generateSuggestedDate(6))}
-                  >
-                    <Text style={styles.suggestionButtonText}>6 meses</Text>
-                  </GlassButton>
-                  
-                  <GlassButton
-                    style={styles.suggestionButton}
-                    onPress={() => setDeadline(generateSuggestedDate(12))}
-                  >
-                    <Text style={styles.suggestionButtonText}>1 ano</Text>
-                  </GlassButton>
+              <Text style={styles.headerTitle}>
+                {objective?.id ? 'Editar Objetivo' : 'Novo Objetivo'}
+              </Text>
+              
+              <TouchableOpacity
+                style={[
+                  styles.saveButton, 
+                  (!isFormValid) && styles.saveButtonDisabled
+                ]}
+                onPress={handleSave}
+                disabled={!isFormValid}
+              >
+                <Text style={[styles.saveButtonText, (!isFormValid) && styles.saveButtonTextDisabled]}>
+                  {loading || contextLoading ? 'Salvando...' : 'Salvar'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Content */}
+            <ScrollView 
+              style={styles.content}
+              showsVerticalScrollIndicator={true}
+              bounces={false}
+              contentContainerStyle={{ paddingBottom: 30 }}
+            >
+              {/* Title Input */}
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>
+                  Título do Objetivo *
+                  {errors.title && <Text style={styles.errorText}> - {errors.title}</Text>}
+                </Text>
+                <TextInput
+                  value={title}
+                  onChangeText={(value) => {
+                    setTitle(value);
+                    if (errors.title) {
+                      setErrors(prev => ({ ...prev, title: null }));
+                    }
+                  }}
+                  placeholder="ex: Reserva de Emergência, Viagem, Carro Novo"
+                  placeholderTextColor="#666"
+                  maxLength={100}
+                  style={[styles.input, errors.title ? styles.inputError : null]}
+                />
+              </View>
+
+              {/* Target Amount Input */}
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>
+                  Valor Meta *
+                  {errors.targetAmount && <Text style={styles.errorText}> - {errors.targetAmount}</Text>}
+                </Text>
+                <TextInput
+                  value={targetAmount}
+                  onChangeText={(value) => {
+                    setTargetAmount(formatCurrencyInput(value));
+                    if (errors.targetAmount) {
+                      setErrors(prev => ({ ...prev, targetAmount: null }));
+                    }
+                  }}
+                  placeholder="0,00"
+                  placeholderTextColor="#666"
+                  keyboardType="numeric"
+                  style={[styles.input, errors.targetAmount ? styles.inputError : null]}
+                />
+              </View>
+
+              {/* Current Amount Input */}
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Valor Atual</Text>
+                <TextInput
+                  value={currentAmount}
+                  onChangeText={(value) => {
+                    setCurrentAmount(formatCurrencyInput(value));
+                  }}
+                  placeholder="0,00"
+                  placeholderTextColor="#666"
+                  keyboardType="numeric"
+                  style={styles.input}
+                />
+                <Text style={styles.helperText}>
+                  Quanto você já tem economizado para este objetivo
+                </Text>
+              </View>
+
+              {/* Enhanced Deadline Input with Calendar */}
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>
+                  Data Meta *
+                  {errors.deadline && <Text style={styles.errorText}> - {errors.deadline}</Text>}
+                </Text>
+                <DateInputWithPicker
+                  value={deadline}
+                  onDateChange={(date) => {
+                    setDeadline(date);
+                    if (errors.deadline) {
+                      setErrors(prev => ({ ...prev, deadline: null }));
+                    }
+                  }}
+                  style={errors.deadline ? styles.inputError : null}
+                />
+                
+                {/* Quick Date Suggestions */}
+                <View style={styles.dateSuggestions}>
+                  <Text style={styles.suggestionLabel}>Seleção rápida:</Text>
+                  <View style={styles.suggestionButtons}>
+                    <TouchableOpacity
+                      style={styles.suggestionButton}
+                      onPress={() => setDeadline(generateSuggestedDate(3))}
+                    >
+                      <Text style={styles.suggestionButtonText}>3 meses</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity
+                      style={styles.suggestionButton}
+                      onPress={() => setDeadline(generateSuggestedDate(6))}
+                    >
+                      <Text style={styles.suggestionButtonText}>6 meses</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity
+                      style={styles.suggestionButton}
+                      onPress={() => setDeadline(generateSuggestedDate(12))}
+                    >
+                      <Text style={styles.suggestionButtonText}>1 ano</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
-            </View>
 
-            {/* Enhanced Progress Preview */}
-            {targetAmount && currentAmount && (
-              <View style={styles.previewContainer}>
-                <View style={[styles.glassOverlay, { borderRadius: 10, height: '40%' }]} />
-                <View style={[styles.depthIndicator, { borderRadius: 10 }]} />
-                
-                <Text style={styles.previewTitle}>Prévia do Progresso</Text>
-                <View style={styles.progressPreview}>
-                  <View style={styles.progressBar}>
-                    <Animated.View
-                      style={[
-                        styles.progressFill,
-                        {
-                          width: `${progressPercentage}%`,
-                          backgroundColor: progressPercentage >= 80 ? '#4CAF50' : 
-                                         progressPercentage >= 50 ? '#FFD700' : 
-                                         progressPercentage >= 25 ? '#FF9800' : '#F44336',
-                        },
-                      ]}
-                    />
+              {/* Enhanced Progress Preview */}
+              {progressData.isValid && (
+                <View style={styles.previewContainer}>
+                  <Text style={styles.previewTitle}>Prévia do Progresso</Text>
+                  <View style={styles.progressPreview}>
+                    <View style={styles.progressBar}>
+                      <View
+                        style={[
+                          styles.progressFill,
+                          {
+                            width: `${Math.max(0, Math.min(100, progressData.percentage))}%`,
+                            backgroundColor: progressData.percentage >= 80 ? '#4CAF50' : 
+                                           progressData.percentage >= 50 ? '#FFD700' : 
+                                           progressData.percentage >= 25 ? '#FF9800' : '#F44336',
+                          },
+                        ]}
+                      />
+                    </View>
+                    <Text style={styles.progressText}>
+                      {Math.max(0, Math.min(100, progressData.percentage)).toFixed(1)}% concluído
+                    </Text>
+                    <Text style={styles.progressSubtext}>
+                      R$ {progressData.current?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} de R$ {progressData.target?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </Text>
                   </View>
-                  <Text style={styles.progressText}>
-                    {progressPercentage.toFixed(1)}% concluído
+                </View>
+              )}
+
+              {/* Enhanced Tips Section */}
+              <View style={styles.tipsContainer}>
+                <Text style={styles.tipsTitle}>💡 Dicas para o Sucesso</Text>
+                <Text style={styles.tipText}>
+                  • Defina prazos realistas e alcançáveis
+                </Text>
+                <Text style={styles.tipText}>
+                  • Divida objetivos grandes em marcos menores
+                </Text>
+                <Text style={styles.tipText}>
+                  • Revise e atualize seu progresso regularmente
+                </Text>
+                <Text style={styles.tipText}>
+                  • Comemore quando alcançar seus objetivos!
+                </Text>
+              </View>
+
+              {/* Enhanced Network Status Indicator */}
+              {(loading || contextLoading) && (
+                <View style={styles.loadingContainer}>
+                  <Text style={styles.loadingText}>
+                    {objective?.id ? 'Atualizando objetivo...' : 'Criando objetivo...'}
+                  </Text>
+                  <Text style={styles.loadingSubtext}>
+                    Por favor, aguarde
                   </Text>
                 </View>
-              </View>
-            )}
-
-            {/* Enhanced Tips Section */}
-            <View style={styles.tipsContainer}>
-              <View style={[styles.glassOverlay, { borderRadius: 10, height: '40%' }]} />
-              <View style={[styles.depthIndicator, { borderRadius: 10 }]} />
-              
-              <Text style={styles.tipsTitle}>💡 Dicas para o Sucesso</Text>
-              <Text style={styles.tipText}>
-                • Defina prazos realistas e alcançáveis
-              </Text>
-              <Text style={styles.tipText}>
-                • Divida objetivos grandes em marcos menores
-              </Text>
-              <Text style={styles.tipText}>
-                • Revise e atualize seu progresso regularmente
-              </Text>
-              <Text style={styles.tipText}>
-                • Comemore quando alcançar seus objetivos!
-              </Text>
-            </View>
-          </ScrollView>
-          
-          {/* 3D depth indicator for modal */}
-          <View style={[styles.depthIndicator, { borderRadius: 20, height: 3 }]} />
-        </Animated.View>
-      </View>
+              )}
+            </ScrollView>
+          </Animated.View>
+        </View>
+      </SafeAreaView>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    paddingTop: 50,
+    paddingBottom: 50,
   },
-  container: {
+  modalContent: {
     width: '100%',
-    maxWidth: 450,
-    maxHeight: '90%',
+    maxWidth: 400,
     backgroundColor: 'rgba(26, 26, 26, 0.98)',
     borderRadius: 20,
+    height: '85%',
     shadowColor: '#FFD700',
     shadowOffset: { width: 0, height: 15 },
     shadowOpacity: 0.8,
@@ -824,7 +740,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 215, 0, 0.3)',
     borderTopColor: 'rgba(255, 255, 255, 0.2)',
     borderBottomColor: 'rgba(0, 0, 0, 0.5)',
-    position: 'relative',
     overflow: 'hidden',
   },
   header: {
@@ -834,6 +749,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 215, 0, 0.2)',
+    backgroundColor: 'rgba(26, 26, 26, 0.95)',
   },
   cancelButton: {
     paddingHorizontal: 15,
@@ -842,19 +758,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(244, 67, 54, 0.2)',
     borderWidth: 1,
     borderColor: 'rgba(244, 67, 54, 0.4)',
+    minWidth: 80,
+    alignItems: 'center',
   },
   cancelButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#F44336',
     fontWeight: '600',
   },
-  title: {
+  headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#FFD700',
     textShadowColor: 'rgba(255, 215, 0, 0.4)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
+    flex: 1,
+    textAlign: 'center',
   },
   saveButton: {
     backgroundColor: '#FFD700',
@@ -869,10 +789,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.3)',
     borderBottomColor: 'rgba(0, 0, 0, 0.2)',
+    minWidth: 80,
+    alignItems: 'center',
   },
   saveButtonDisabled: {
-    opacity: 0.6,
+    backgroundColor: '#666666',
     shadowOpacity: 0.2,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
   saveButtonText: {
     color: '#000000',
@@ -880,10 +803,15 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(255, 255, 255, 0.3)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
+    fontSize: 14,
+  },
+  saveButtonTextDisabled: {
+    color: '#888888',
   },
   content: {
     flex: 1,
     padding: 20,
+    backgroundColor: 'rgba(26, 26, 26, 0.98)',
   },
   inputContainer: {
     marginBottom: 25,
@@ -913,7 +841,16 @@ const styles = StyleSheet.create({
     elevation: 6,
     borderTopColor: 'rgba(255, 255, 255, 0.2)',
     borderBottomColor: 'rgba(0, 0, 0, 0.4)',
-    position: 'relative',
+  },
+  inputError: {
+    borderColor: 'rgba(244, 67, 54, 0.5)',
+    borderTopColor: 'rgba(244, 67, 54, 0.3)',
+    shadowColor: '#F44336',
+  },
+  errorText: {
+    color: '#F44336',
+    fontSize: 12,
+    fontWeight: '500',
   },
   helperText: {
     fontSize: 12,
@@ -935,18 +872,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingRight: 60,
   },
-  calendarIconContainer: {
+  calendarIcon: {
     position: 'absolute',
     right: 15,
     top: '50%',
     transform: [{ translateY: -20 }],
-    shadowColor: '#FFD700',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  calendarIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -955,14 +885,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255, 215, 0, 0.3)',
-    position: 'relative',
-    overflow: 'hidden',
+    shadowColor: '#FFD700',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
     borderTopColor: 'rgba(255, 255, 255, 0.2)',
     borderBottomColor: 'rgba(0, 0, 0, 0.2)',
   },
   calendarIconText: {
     fontSize: 18,
-    zIndex: 2,
   },
 
   // Date Suggestions
@@ -1015,8 +947,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 12,
     elevation: 8,
-    position: 'relative',
-    overflow: 'hidden',
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
     borderBottomColor: 'rgba(0, 0, 0, 0.3)',
   },
@@ -1065,6 +995,12 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
+    marginBottom: 4,
+  },
+  progressSubtext: {
+    fontSize: 12,
+    color: '#CCCCCC',
+    textAlign: 'center',
   },
 
   // Enhanced Tips Container
@@ -1080,8 +1016,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 12,
     elevation: 6,
-    position: 'relative',
-    overflow: 'hidden',
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
     borderBottomColor: 'rgba(0, 0, 0, 0.3)',
   },
@@ -1104,30 +1038,36 @@ const styles = StyleSheet.create({
     textShadowRadius: 1,
   },
 
-  // 3D Glass Effects
-  glassOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+  // Loading Container
+  loadingContainer: {
+    backgroundColor: 'rgba(26, 26, 26, 0.7)',
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 25,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.2)',
+    shadowColor: '#FFD700',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.3)',
+    alignItems: 'center',
   },
-  depthIndicator: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 2,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  loadingText: {
+    fontSize: 16,
+    color: '#FFD700',
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textShadowColor: 'rgba(255, 215, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
-  premiumGlow: {
-    position: 'absolute',
-    top: -3,
-    left: -3,
-    right: -3,
-    bottom: -3,
-    backgroundColor: 'rgba(255, 215, 0, 0.08)',
-    zIndex: -1,
+  loadingSubtext: {
+    fontSize: 12,
+    color: '#CCCCCC',
+    textAlign: 'center',
   },
 
   // Date Picker Modal Styles
@@ -1153,7 +1093,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 215, 0, 0.3)',
     borderTopColor: 'rgba(255, 255, 255, 0.2)',
     borderBottomColor: 'rgba(0, 0, 0, 0.5)',
-    position: 'relative',
     overflow: 'hidden',
   },
   datePickerHeader: {
@@ -1171,6 +1110,7 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(255, 215, 0, 0.4)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
+    flex: 1,
   },
   datePickerCloseButton: {
     width: 30,
@@ -1263,7 +1203,7 @@ const styles = StyleSheet.create({
   // Calendar Styles
   calendarContainer: {
     padding: 20,
-    flex: 1,
+    maxHeight: 300,
   },
   calendarHeader: {
     flexDirection: 'row',
@@ -1283,20 +1223,25 @@ const styles = StyleSheet.create({
   calendarGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-around',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
   },
   calendarDay: {
-    width: 40,
-    height: 40,
+    width: '14.28%', // 100% / 7 days = 14.28%
+    aspectRatio: 1,
     marginVertical: 2,
     justifyContent: 'center',
     alignItems: 'center',
   },
   calendarDayButton: {
+    width: '80%',
+    height: '80%',
     borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   calendarDaySelected: {
     backgroundColor: '#FFD700',
@@ -1316,6 +1261,7 @@ const styles = StyleSheet.create({
     color: '#CCCCCC',
     fontSize: 14,
     fontWeight: '500',
+    textAlign: 'center',
   },
   calendarDayTextSelected: {
     color: '#000000',

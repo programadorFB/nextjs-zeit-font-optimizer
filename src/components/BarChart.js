@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+
 import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg';
 
 const BarChart = ({ data, width, height }) => {

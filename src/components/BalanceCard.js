@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
+
 const BalanceCard = ({ balance }) => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {

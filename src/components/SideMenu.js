@@ -4,12 +4,10 @@ import {
   Text,
   TouchableOpacity,
   Animated,
-  Image,
   Alert,
   StyleSheet,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { styles } from './styles';
 import { BlurView } from 'expo-blur';
 import { MaterialIcons, FontAwesome5, Feather } from '@expo/vector-icons';
 
@@ -85,20 +83,16 @@ const MenuItem = ({ icon, text, onPress, isLogout = false, isNew = false }) => {
         onPressOut={handlePressOut}
         activeOpacity={1}
       >
-        <BlurView intensity={25} tint="dark" style={StyleSheet.absoluteFill} />
+        <BlurView intensity={25} tint="dark" style={styles.blurContainer} />
         <Animated.View
           style={[
             styles.menuItemBorder, 
             { opacity: glowOpacity },
-            isNew && { borderColor: '#FFD700' }
+            isNew && { borderColor: '#ada860ff' }
           ]}
         />
         
-        {isNew && (
-          <View style={styles.newBadge}>
-            <Text style={styles.newBadgeText}>NEW</Text>
-          </View>
-        )}
+
         
         <View style={styles.menuItemContent}>
           <View style={styles.menuIcon}>
@@ -143,7 +137,7 @@ const SideMenu = ({ visible, slideAnim, onClose, navigation }) => {
         },
       ]}
     >
-      <BlurView intensity={50} tint="dark" style={StyleSheet.absoluteFill} />
+      <BlurView intensity={50} tint="dark" style={styles.blurContainer} />
 
       <View style={styles.profileSection}>
         <Text style={styles.userName}>{user?.name || 'User'}</Text>
@@ -179,7 +173,7 @@ const SideMenu = ({ visible, slideAnim, onClose, navigation }) => {
         
         {/* NEW: Investment Profile Button */}
         <MenuItem
-          icon={<FontAwesome5 name="user-tie" size={20} color="#FFD700" />}
+          icon={<FontAwesome5 name="user-tie" size={20} color="white" />}
           text="Perfil de Investimento"
           onPress={() => { onClose(); navigation.navigate('InvestmentProfile'); }}
           isNew={true}
@@ -205,5 +199,133 @@ const SideMenu = ({ visible, slideAnim, onClose, navigation }) => {
     </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    width: 280,
+    backgroundColor: 'rgba(26, 26, 26, 0.6)',
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 2,
+      height: 0,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    overflow: 'hidden',
+  },
+  blurContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  profileSection: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333333',
+  },
+  userName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 5,
+    textAlign: 'center',
+  },
+  userEmail: {
+    fontSize: 14,
+    color: '#CCCCCC',
+    textAlign: 'center',
+  },
+  menuItems: {
+    flex: 1,
+    paddingTop: 20,
+  },
+  menuItemContainer: {
+    marginHorizontal: 10,
+    marginVertical: 3,
+    borderRadius: 12,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  menuItemBorder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  menuItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    zIndex: 1,
+  },
+  menuIcon: {
+    width: 30,
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  menuText: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    fontWeight: '500',
+    flex: 1,
+  },
+  logoutText: {
+    color: '#FF6B6B',
+  },
+  newMenuItem: {
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.5)',
+    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+  },
+  newMenuText: {
+    color: '#FFD700',
+  },
+  newBadge: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    backgroundColor: '#FFD700',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    zIndex: 10,
+  },
+  newBadgeText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  separator: {
+    height: 1,
+    backgroundColor: 'rgba(51, 51, 51, 0.8)',
+    marginVertical: 15,
+    marginHorizontal: 20,
+  },
+  footer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#333333',
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 12,
+    color: '#888888',
+  },
+});
 
 export default SideMenu;

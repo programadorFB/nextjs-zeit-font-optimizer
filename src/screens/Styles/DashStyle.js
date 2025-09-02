@@ -8,53 +8,79 @@ export const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-  
+
   // Header Styles
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 20,
-    paddingTop: 10,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
   },
   menuButton: {
-    padding: 10,
+    width: 30,
+    height: 30,
+    justifyContent: 'space-between',
+    paddingVertical: 6,
   },
   menuLine: {
-    width: 25,
-    height: 3,
-    backgroundColor: '#FFD700',
-    marginBottom: 4,
-    borderRadius: 2,
+    width: '100%',
+    height: 2,
+    borderColor: 'transparent',
+    borderRadius: 1,
   },
   greeting: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    flex: 1,
-    marginLeft: 15,
+    textAlign: 'center',
   },
 
-  // Balance Cards Section
+  // Warning Banner
+  warningBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(209, 180, 100, 0.1)', // Cor dourada secundária com opacidade
+    borderColor: '#d1b464', // Dourado secundário
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    marginHorizontal: 20,
+    marginBottom: 15,
+  },
+  warningText: {
+    color: '#d1b464', // Dourado secundário
+    fontSize: 14,
+    marginLeft: 8,
+    flex: 1,
+  },
+  warningAmount: {
+    color: '#d1b464', // Dourado secundário
+  },
+
+  // Balance Section
   balanceSection: {
     flexDirection: 'row',
-    paddingHorizontal: 15,
-    marginBottom: 25,
-    gap: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    gap: 12,
   },
   balanceCard: {
     flex: 1,
     backgroundColor: '#1A1A1A',
     borderRadius: 15,
-    padding: 15,
+    padding: 16,
     borderWidth: 1,
     borderColor: '#333333',
-    minHeight: 120,
+    alignItems: 'center',
+    minHeight: 100,
   },
   mainBalanceCard: {
-    borderColor: '#FFD700',
     borderWidth: 2,
-    shadowColor: '#FFD700',
+    borderColor: '#fdb931', // Dourado principal
+    shadowColor: '#fdb931', // Dourado principal
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -72,22 +98,16 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
   balanceAmount: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 4,
-  },
-  mainBalance: {
-    fontSize: 18,
+    textAlign: 'center',
   },
   initialAmount: {
     color: '#4CAF50',
   },
-  objectiveAmount: {
-    color: '#FF9800',
-  },
-  noObjective: {
-    color: '#666666',
-    fontSize: 24,
+  mainBalance: {
+    fontSize: 20,
   },
   positiveBalance: {
     color: '#4CAF50',
@@ -95,9 +115,16 @@ export const styles = StyleSheet.create({
   negativeBalance: {
     color: '#F44336',
   },
+  objectiveAmount: {
+    color: '#d1b464', // Dourado secundário
+  },
+  noObjective: {
+    color: '#666666',
+  },
   cardSubtitle: {
     fontSize: 10,
     color: '#888888',
+    textAlign: 'center',
   },
   performanceContainer: {
     flexDirection: 'row',
@@ -106,46 +133,43 @@ export const styles = StyleSheet.create({
   },
   performanceText: {
     fontSize: 12,
-    fontWeight: '600',
     marginLeft: 4,
+    fontWeight: '600',
   },
   progressBarMini: {
-    height: 4,
+    width: '100%',
+    height: 3,
     backgroundColor: '#333333',
     borderRadius: 2,
-    marginTop: 8,
+    marginTop: 6,
     overflow: 'hidden',
   },
   progressFillMini: {
     height: '100%',
-    backgroundColor: '#FF9800',
+    backgroundColor: '#d1b464', // Dourado secundário
     borderRadius: 2,
   },
   addObjectiveText: {
-    fontSize: 12,
-    color: '#FFD700',
+    fontSize: 10,
+    color: '#fdb931', // Dourado principal
+    marginTop: 4,
     textAlign: 'center',
-    marginTop: 8,
-    textDecorationLine: 'underline',
+  },
+  dataSourceText: {
+    fontSize: 10,
+    color: '#888',
+    marginTop: 4,
   },
   initialDepositsContainer: {
     marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(76, 175, 80, 0.3)',
-  },
-  initialDepositsText: {
-    fontSize: 10,
-    color: '#4CAF50',
-    textAlign: 'center',
+    alignItems: 'center',
   },
 
-  // Quick Actions Styles
+  // Quick Actions
   quickActions: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
     paddingHorizontal: 20,
-    marginBottom: 30,
+    paddingVertical: 15,
     gap: 10,
   },
   actionButton: {
@@ -153,16 +177,9 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 15,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 6,
   },
   depositButton: {
     backgroundColor: '#4CAF50',
@@ -171,88 +188,102 @@ export const styles = StyleSheet.create({
     backgroundColor: '#F44336',
   },
   chartsButton: {
-    backgroundColor: '#FFD700',
+    borderColor: 'transparent',
   },
   actionButtonText: {
-    color: '#000000',
-    fontWeight: 'bold',
     fontSize: 14,
-    marginLeft: 6,
+    fontWeight: 'bold',
+    color: '#000000',
   },
 
-  // Overview Section Styles
+  // Overview Section
   overviewSection: {
     paddingHorizontal: 20,
-    marginBottom: 25,
+    paddingVertical: 15,
   },
-  overviewCards: {
+  sectionHeader: {
     flexDirection: 'row',
-    gap: 10,
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 15,
-    flexWrap: 'wrap',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fdb931', // Dourado principal
+  },
+  behaviorDisplay: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  behaviorText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+
+  // Overview Cards
+  overviewCards: {
+    gap: 15,
   },
   overviewCard: {
-    flex: 1,
     backgroundColor: '#1A1A1A',
-    borderRadius: 12,
-    padding: 15,
+    borderRadius: 15,
+    padding: 20,
     borderWidth: 1,
     borderColor: '#333333',
-    minWidth: '45%',
+    position: 'relative',
+    overflow: 'hidden',
   },
   operationProfitCard: {
-    borderLeftColor: '#FFD700',
     borderLeftWidth: 4,
-    minWidth: '100%',
-    marginBottom: 10,
+    borderLeftColor: '#4CAF50',
   },
   stopLossCard: {
-    borderLeftColor: '#F44336',
     borderLeftWidth: 4,
+    borderLeftColor: '#F44336',
   },
   profitTargetCard: {
-    borderLeftColor: '#4CAF50',
     borderLeftWidth: 4,
+    borderLeftColor: '#4CAF50',
   },
   overviewCardHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    alignItems: 'center',
+    marginBottom: 10,
   },
   cardTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
   overviewCardTitle: {
-    fontSize: 12,
-    color: '#CCCCCC',
-    marginLeft: 6,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
   statusIndicator: {
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-    borderWidth: 1,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   statusText: {
     fontSize: 10,
     fontWeight: 'bold',
   },
   editButton: {
-    padding: 4,
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
-    borderRadius: 4,
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(253, 185, 49, 0.1)', // Dourado principal com opacidade
   },
   overviewAmount: {
-    fontSize: 14,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 10,
   },
   operationProfitAmount: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 28,
   },
   stopLossAmount: {
     color: '#F44336',
@@ -260,67 +291,45 @@ export const styles = StyleSheet.create({
   profitAmount: {
     color: '#4CAF50',
   },
+  progressInfo: {
+    marginBottom: 15,
+  },
   overviewSubtitle: {
-    fontSize: 10,
-    color: '#888888',
+    fontSize: 14,
+    color: '#CCCCCC',
     marginBottom: 8,
   },
   distanceText: {
-    fontSize: 9,
+    fontSize: 12,
     color: '#AAAAAA',
-  },
-  progressInfo: {
-    marginBottom: 8,
+    marginBottom: 4,
   },
   riskIndicator: {
-    height: 3,
+    width: '100%',
+    height: 6,
     backgroundColor: '#333333',
-    borderRadius: 2,
+    borderRadius: 3,
     overflow: 'hidden',
   },
   riskBar: {
     height: '100%',
-    borderRadius: 2,
-  },
-  behaviorDisplay: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 215, 0, 0.3)',
-  },
-  behaviorText: {
-    fontSize: 10,
-    fontWeight: '600',
-    marginLeft: 4,
+    borderRadius: 3,
   },
 
   // Section Styles
   section: {
-    marginBottom: 30,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 15,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFD700',
+    paddingVertical: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#333333',
   },
   seeAllText: {
-    color: '#FFD700',
     fontSize: 14,
-    textDecorationLine: 'underline',
+    color: '#fdb931', // Dourado principal
+    fontWeight: '600',
   },
 
-  // Empty State Styles
+  // Empty State
   emptyState: {
     alignItems: 'center',
     paddingVertical: 40,
@@ -337,9 +346,10 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: '#888888',
     textAlign: 'center',
+    lineHeight: 20,
   },
 
-  // Overlay Styles
+  // Side Menu & Overlay
   overlay: {
     position: 'absolute',
     top: 0,
@@ -347,6 +357,7 @@ export const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 10,
   },
 
   // Modal Styles
@@ -355,14 +366,20 @@ export const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
   modalContainer: {
     backgroundColor: '#1A1A1A',
-    borderRadius: 15,
-    width: '90%',
+    borderRadius: 20,
+    width: '100%',
     maxWidth: 400,
     borderWidth: 1,
     borderColor: '#333333',
+    shadowColor: '#fdb931', // Dourado principal
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 20,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -375,10 +392,15 @@ export const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FFD700',
+    color: '#fdb931', // Dourado principal
   },
   modalCloseButton: {
-    padding: 4,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContent: {
     padding: 20,
@@ -388,44 +410,42 @@ export const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 14,
-    color: '#CCCCCC',
+    color: '#fdb931', // Dourado principal
     marginBottom: 8,
     fontWeight: '600',
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2A2A2A',
-    borderRadius: 8,
+    backgroundColor: '#0A0A0A',
     borderWidth: 1,
-    borderColor: '#444444',
-    paddingHorizontal: 12,
+    borderColor: '#333333',
+    borderRadius: 10,
+    paddingHorizontal: 15,
   },
   currencySymbol: {
     fontSize: 16,
-    color: '#FFD700',
-    fontWeight: 'bold',
+    color: '#fdb931', // Dourado principal
     marginRight: 8,
   },
   modalInput: {
     flex: 1,
+    paddingVertical: 15,
     fontSize: 16,
     color: '#FFFFFF',
-    paddingVertical: 12,
   },
   errorText: {
     fontSize: 12,
     color: '#F44336',
-    marginTop: 4,
+    marginTop: 5,
   },
   presetContainer: {
-    marginBottom: 20,
+    marginTop: 15,
   },
   presetTitle: {
     fontSize: 14,
     color: '#CCCCCC',
-    marginBottom: 12,
-    fontWeight: '600',
+    marginBottom: 10,
   },
   presetButtons: {
     flexDirection: 'row',
@@ -433,52 +453,53 @@ export const styles = StyleSheet.create({
     gap: 8,
   },
   presetButton: {
-    backgroundColor: '#2A2A2A',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#444444',
+    backgroundColor: '#333333',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    minWidth: 70,
+    borderRadius: 8,
     alignItems: 'center',
+    minWidth: 70,
   },
   presetButtonText: {
     fontSize: 12,
-    color: '#FFD700',
-    fontWeight: 'bold',
+    color: '#fdb931', // Dourado principal
+    fontWeight: '600',
   },
   presetValueText: {
     fontSize: 10,
-    color: '#AAAAAA',
+    color: '#CCCCCC',
     marginTop: 2,
   },
   modalActions: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     padding: 20,
-    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#333333',
+    gap: 15,
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: '#444444',
-    borderRadius: 8,
     paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: '#333333',
     alignItems: 'center',
   },
   cancelButtonText: {
-    fontSize: 14,
-    color: '#FFFFFF',
+    color: '#CCCCCC',
+    fontSize: 16,
     fontWeight: '600',
   },
   saveButton: {
     flex: 1,
-    backgroundColor: '#FFD700',
-    borderRadius: 8,
     paddingVertical: 12,
+    borderRadius: 10,
+    borderColor: 'transparent',
     alignItems: 'center',
   },
   saveButtonText: {
-    fontSize: 14,
     color: '#000000',
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });

@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#FFD700',
+    borderColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 4,
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   imageButton: {
-    backgroundColor: '#FFD700',
+    borderColor: 'transparent',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   saveButton: {
-    backgroundColor: '#FFD700',
+    borderColor: 'transparent',
   },
   saveButtonText: {
     color: '#000000',

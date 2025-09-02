@@ -41,7 +41,7 @@ const RiskSettingsScreen = () => {
         setStopLossPercentage(((bettingProfile.stopLoss / bettingProfile.initialBalance) * 100).toFixed(0));
       }
       if (bettingProfile.dailyTarget > 0) {
-        setDailyTargetPercentage(((bettingProfile.dailyTarget / bettingProfile.initialBalance) * 100).toFixed(1));
+        setDailyTargetPercentage(((bettingProfile.dailyTarget / bettingProfile.initialBalance) * 100).toFixed(0));
       }
       if (bettingProfile.profitTarget > 0) {
         setProfitTargetPercentage(((bettingProfile.profitTarget / bettingProfile.initialBalance) * 100).toFixed(0));

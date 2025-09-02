@@ -6,18 +6,21 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  StyleSheet,
   Animated,
   Modal,
+  StyleSheet,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useFinancial } from '../context/FinancialContext';
 import ObjectiveModal from '../components/ObjectiveModal';
 import GlassButton from '../components/GlassButton';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
-import { styles } from './TransactionStyle';
+import { styles, donutStyles } from './TransactionStyle';
 import { useBetting } from '../context/BettingContext';
-
+import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { GoldGradient } from '../components/GoldGradient';
+// CHANGE 1: Import the ObjectivesList component
+import ObjectivesList from '../components/ObjectiveList'; // Assuming the file is in the same folder
 
 // Enhanced Date Picker Component with 3D Glass Effects
 const DatePicker3D = ({ visible, onClose, onDateSelect, selectedDate }) => {
@@ -407,10 +410,115 @@ const GlassInput = ({ style, ...props }) => {
   );
 };
 
+// Enhanced Donut Chart Component for Objectives
+const DonutChart = ({ progress, size = 80 }) => {
+  const RADIUS = (size - 16) / 2 - 8;
+  const STROKE_WIDTH = 6;
+  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+  const progressStroke = (CIRCUMFERENCE * progress) / 100;
+
+  const getProgressColor = (progress) => {
+    if (progress >= 80) return '#4CAF50';
+    if (progress >= 50) return '#FFD700';
+    if (progress >= 25) return '#FF9800';
+    return '#F44336';
+  };
+
+  const getProgressGradientId = (progress) => {
+    if (progress >= 80) return 'gradientGreen';
+    if (progress >= 50) return 'gradientGold';
+    if (progress >= 25) return 'gradientOrange';
+    return 'gradientRed';
+  };
+
+  const progressColor = getProgressColor(progress);
+  const center = size / 2;
+
+  return (
+    <View style={donutStyles.container}>
+      <Svg height={size} width={size}>
+        <Defs>
+          <LinearGradient id="gradientGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+            <Stop offset="0%" stopColor="#66BB6A" stopOpacity="1" />
+            <Stop offset="100%" stopColor="#4CAF50" stopOpacity="1" />
+          </LinearGradient>
+          <LinearGradient id="gradientGold" x1="0%" y1="0%" x2="100%" y2="100%">
+            <Stop offset="0%" stopColor="#FFEB3B" stopOpacity="1" />
+            <Stop offset="100%" stopColor="#FFD700" stopOpacity="1" />
+          </LinearGradient>
+          <LinearGradient id="gradientOrange" x1="0%" y1="0%" x2="100%" y2="100%">
+            <Stop offset="0%" stopColor="#FFA726" stopOpacity="1" />
+            <Stop offset="100%" stopColor="#FF9800" stopOpacity="1" />
+          </LinearGradient>
+          <LinearGradient id="gradientRed" x1="0%" y1="0%" x2="100%" y2="100%">
+            <Stop offset="0%" stopColor="#EF5350" stopOpacity="1" />
+            <Stop offset="100%" stopColor="#F44336" stopOpacity="1" />
+          </LinearGradient>
+        </Defs>
+        
+        {/* Background circle */}
+        <Circle
+          cx={center}
+          cy={center}
+          r={RADIUS}
+          stroke="rgba(51, 51, 51, 0.8)"
+          strokeWidth={STROKE_WIDTH}
+          fill="none"
+        />
+        
+        {/* Progress circle with gradient */}
+        <Circle
+          cx={center}
+          cy={center}
+          r={RADIUS}
+          stroke={`url(#${getProgressGradientId(progress)})`}
+          strokeWidth={STROKE_WIDTH}
+          strokeDasharray={`${progressStroke}, ${CIRCUMFERENCE}`}
+          strokeLinecap="round"
+          rotation="-90"
+          origin={`${center},${center}`}
+          fill="none"
+          opacity="0.9"
+        />
+        
+        {/* Inner glow effect */}
+        <Circle
+          cx={center}
+          cy={center}
+          r={RADIUS - STROKE_WIDTH/2}
+          stroke={progressColor}
+          strokeWidth="1"
+          strokeDasharray={`${progressStroke}, ${CIRCUMFERENCE}`}
+          strokeLinecap="round"
+          rotation="-90"
+          origin={`${center},${center}`}
+          fill="none"
+          opacity="0.3"
+        />
+      </Svg>
+      
+      {/* Center text overlay */}
+      <View style={[donutStyles.textOverlay, { width: size, height: size }]}>
+        <Text style={[donutStyles.percentageText, { fontSize: size * 0.16 }]}>
+          {`${Math.round(progress)}%`}
+        </Text>
+        <Text style={[donutStyles.labelText, { fontSize: size * 0.1 }]}>
+          Meta
+        </Text>
+      </View>
+    </View>
+  );
+};
+
+export const categories = {
+  deposit: ['Depósito Inicial', 'Recarga', 'Bônus', 'Ganhos', 'Transferência', 'Outros'],
+  withdraw: ['Saque de Lucro', 'Stop-Loss', 'Pagamento','Perdas', 'Taxa', 'Transferência', 'Outros'],
+};
+
 const TransactionScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { addTransaction, addObjective, objectives, updateObjective } = useFinancial();
+  const { addTransaction, addObjective, objectives, updateObjective, deleteObjective } = useFinancial();
 
   const [activeTab, setActiveTab] = useState(
     route.params?.showObjectives ? 'objectives' : 'transaction'
@@ -423,13 +531,7 @@ const TransactionScreen = () => {
   const [objectiveModalVisible, setObjectiveModalVisible] = useState(false);
   const [editingObjective, setEditingObjective] = useState(null);
   const [isInitialBank, setIsInitialBank] = useState(false);
-
-  // Categorias adaptadas para apostas
-  const categories = {
-    deposit: ['Depósito Inicial', 'Recarga', 'Bônus', 'Ganhos', 'Transferência', 'Outros'],
-    withdraw: ['Saque de Lucro', 'Stop-Loss', 'Pagamento', 'Taxa', 'Transferência', 'Outros'],
-  };
-
+  
   useEffect(() => {
     const today = new Date();
     const formattedToday = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -440,8 +542,19 @@ const TransactionScreen = () => {
   }, [route.params]);
 
   const handleAddTransaction = async () => {
+    // Validação obrigatória: valor e data sempre obrigatórios
     if (!amount || !date) {
       Alert.alert('Erro', 'Preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    // NOVA VALIDAÇÃO: Categoria é obrigatória para todos os tipos de transação
+    if (!category) {
+      Alert.alert(
+        'Categoria Obrigatória', 
+        'Por favor, selecione uma categoria antes de prosseguir com a transação.',
+        [{ text: 'OK' }]
+      );
       return;
     }
 
@@ -456,8 +569,8 @@ const TransactionScreen = () => {
       const result = await addTransaction({
         type: transactionType,
         amount: numericAmount,
-        description: `${transactionType === 'deposit' ? 'Depósito' : 'Saque'} - ${category || 'Outros'}`,
-        category: category || 'Outros',
+        description: `${transactionType === 'deposit' ? 'Depósito' : 'Saque'} - ${category}`,
+        category: category,
         date,
         isInitialBank,
       });
@@ -491,27 +604,60 @@ const TransactionScreen = () => {
     }
   };
 
+  // CHANGE 2: The old handleDeleteObjective function is no longer needed here.
+  // It has been removed. The logic is now handled inside ObjectiveList.js
+
   const handleObjectiveAction = (obj = null) => {
     setEditingObjective(obj);
     setObjectiveModalVisible(true);
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(amount);
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  };
+
+  const getDaysRemaining = (deadline) => {
+    const today = new Date();
+    const deadlineDate = new Date(deadline);
+    const diffTime = deadlineDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
   };
 
   const renderTransactionForm = () => (
     <ScrollView style={styles.formContainer}>
       {/* Transaction Type Selector */}
       <View style={styles.typeSelector}>
+      <GoldGradient>
         <GlassButton
           style={[styles.typeButton, styles.depositButton, transactionType === 'deposit' && styles.typeButtonActive]}
           onPress={() => setTransactionType('deposit')}
           active={transactionType === 'deposit'}
         >
           <View style={{ alignItems: 'center' }}>
-            <FontAwesome5 name="plus-circle" size={20} color={transactionType === 'deposit' ? '#000' : '#4CAF50'} />
+            <FontAwesome5 
+              name="plus-circle" 
+              size={20} 
+              color={transactionType === 'deposit' ? '#000' : '#4CAF50'} 
+            />
             <Text style={[styles.typeButtonText, transactionType === 'deposit' && { color: '#000' }]}>
               Depósito
             </Text>
           </View>
         </GlassButton>
+      </GoldGradient>
 
         <GlassButton
           style={[styles.typeButton, styles.withdrawButton, transactionType === 'withdraw' && styles.typeButtonActive]}
@@ -530,7 +676,7 @@ const TransactionScreen = () => {
       {/* Amount Input */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>
-          <FontAwesome5 name="coins" size={14} color="#FFD700" /> Valor *
+          <FontAwesome5 name="coins" size={14}  /> Valor *
         </Text>
         <GlassInput
           value={amount}
@@ -552,11 +698,16 @@ const TransactionScreen = () => {
         />
       </View>
 
-      {/* Category Selection */}
+      {/* Category Selection - AGORA OBRIGATÓRIA */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>
-          <MaterialIcons name="category" size={14} color="#FFD700" /> Categoria
+          <MaterialIcons name="category" size={14} color="#FFD700" /> Categoria *
         </Text>
+        {!category && (
+          <Text style={styles.categoryWarning}>
+            ⚠️ Selecione uma categoria para continuar
+          </Text>
+        )}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={styles.categoryContainer}>
             {categories[transactionType].map(cat => (
@@ -607,28 +758,41 @@ const TransactionScreen = () => {
         </View>
       )}
 
-      {/* Submit Button */}
+      {/* Submit Button - DESABILITADO SE NÃO TIVER CATEGORIA */}
       <GlassButton
-        style={[styles.submitButton, loading && styles.submitButtonDisabled]}
+        style={[
+          styles.submitButton, 
+          (loading || !category) && styles.submitButtonDisabled
+        ]}
         onPress={handleAddTransaction}
-        disabled={loading}
-        active
+        disabled={loading || !category}
+        active={!loading && !!category}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
           <FontAwesome5 
             name={transactionType === 'deposit' ? 'plus' : 'minus'} 
             size={16} 
-            color="#000" 
+            color={!category ? "#666" : "#000"} 
             style={{ marginRight: 8 }} 
           />
-          <Text style={styles.submitButtonText}>
-            {loading ? 'Processando...' : `Adicionar ${transactionType === 'deposit' ? 'Depósito' : 'Saque'}`}
+          <Text style={[
+            styles.submitButtonText,
+            !category && { color: '#666' }
+          ]}>
+            {loading 
+              ? 'Processando...' 
+              : !category 
+                ? 'Selecione uma categoria'
+                : `Adicionar ${transactionType === 'deposit' ? 'Depósito' : 'Saque'}`
+            }
           </Text>
         </View>
       </GlassButton>
     </ScrollView>
   );
 
+  // CHANGE 3: Replace the entire renderObjectivesList function with a cleaner version
+  // that uses the dedicated ObjectivesList component.
   const renderObjectivesList = () => (
     <ScrollView style={styles.objectivesContainer}>
       <GlassButton
@@ -641,49 +805,15 @@ const TransactionScreen = () => {
           <Text style={styles.addObjectiveButtonText}>Novo Objetivo</Text>
         </View>
       </GlassButton>
-
-      {objectives.map((obj) => (
-        <TouchableOpacity
-          key={obj.id}
-          style={styles.objectiveItemCard}
-          onPress={() => handleObjectiveAction(obj)}
-        >
-          <View style={styles.objectiveItemHeader}>
-            <Text style={styles.objectiveTitle}>{obj.title}</Text>
-            <Text style={styles.objectiveProgress}>
-              {((obj.current_amount / obj.target_amount) * 100).toFixed(1)}%
-            </Text>
-          </View>
-          
-          <View style={styles.objectiveProgressBar}>
-            <View 
-              style={[
-                styles.objectiveProgressFill,
-                { width: `${(obj.current_amount / obj.target_amount) * 100}%` }
-              ]} 
-            />
-          </View>
-          
-          <View style={styles.objectiveDetails}>
-            <Text style={styles.objectiveAmount}>
-              R$ {obj.current_amount.toLocaleString('pt-BR')} / R$ {obj.target_amount.toLocaleString('pt-BR')}
-            </Text>
-            <MaterialIcons name="chevron-right" size={20} color="#FFD700" />
-          </View>
-        </TouchableOpacity>
-      ))}
-
-      {objectives.length === 0 && (
-        <View style={styles.emptyObjectives}>
-          <FontAwesome5 name="target" size={40} color="#666" />
-          <Text style={styles.emptyObjectivesText}>Nenhum objetivo definido</Text>
-          <Text style={styles.emptyObjectivesSubtext}>
-            Crie objetivos para acompanhar suas metas de apostas
-          </Text>
-        </View>
-      )}
+      
+      <ObjectivesList 
+        objectives={objectives}
+        onUpdateObjective={updateObjective}
+        onDeleteObjective={deleteObjective}
+      />
     </ScrollView>
   );
+
 
   return (
     <View style={styles.container}>
@@ -743,109 +873,5 @@ const TransactionScreen = () => {
     </View>
   );
 };
-
-// Additional styles for new components
-const additionalStyles = StyleSheet.create({
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    padding: 15,
-    backgroundColor: 'rgba(255, 215, 0, 0.05)',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 215, 0, 0.2)',
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: '#FFD700',
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxActive: {
-    backgroundColor: '#FFD700',
-  },
-  checkboxLabel: {
-    color: '#FFD700',
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  checkboxDescription: {
-    color: '#CCCCCC',
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  objectiveItemCard: {
-    backgroundColor: '#1A1A1A',
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: '#333333',
-  },
-  objectiveItemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  objectiveTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    flex: 1,
-  },
-  objectiveProgress: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFD700',
-  },
-  objectiveProgressBar: {
-    height: 8,
-    backgroundColor: '#333333',
-    borderRadius: 4,
-    marginBottom: 15,
-    overflow: 'hidden',
-  },
-  objectiveProgressFill: {
-    height: '100%',
-    backgroundColor: '#FFD700',
-    borderRadius: 4,
-  },
-  objectiveDetails: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  objectiveAmount: {
-    fontSize: 14,
-    color: '#CCCCCC',
-  },
-  emptyObjectives: {
-    alignItems: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 20,
-  },
-  emptyObjectivesText: {
-    fontSize: 18,
-    color: '#CCCCCC',
-    marginTop: 20,
-    marginBottom: 8,
-    fontWeight: '600',
-  },
-  emptyObjectivesSubtext: {
-    fontSize: 14,
-    color: '#888888',
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-});
-
-// Merge additional styles with existing ones
-Object.assign(styles, additionalStyles);
 
 export default TransactionScreen;
