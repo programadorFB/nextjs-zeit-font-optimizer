@@ -496,3 +496,7 @@ if __name__ == '__main__':
         
         logger.info('Application shutdown complete')
         print('\nThank you for using Betting Management System!')
+
+        if __name__ != '__main__':
+    # This is for Gunicorn to find the app instance
+            gunicorn_app = app
