@@ -8,6 +8,9 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV FLASK_ENV=production
 ENV FLASK_APP=run.py
+ENV GUNICORN_WORKERS=4
+ENV GUNICORN_THREADS=2
+ENV GUNICORN_TIMEOUT=120
 
 # Set working directory
 WORKDIR /app
@@ -16,6 +19,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first to leverage Docker cache
