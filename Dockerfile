@@ -38,5 +38,8 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5000/health || exit 1
 
-# Correct Gunicorn CMD
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--threads", "2", "--timeout", "120", "backend.run:app"]
+# Use shell form for PORT expansion
+CMD gunicorn --bind 0.0.0.0:${PORT:-5000} \
+             --workers ${GUNICORN_WORKERS} \
+             --threads ${GUNICORN_THREADS} \
+             --timeout ${GUNICORN_TIMEOUT} \
